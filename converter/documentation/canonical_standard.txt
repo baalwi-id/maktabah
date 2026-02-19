@@ -1,0 +1,533 @@
+============================================================
+CANONICAL TEXT STANDARD v1.1.1
+============================================================
+
+DEFINISI
+
+Canonical = transkripsi diplomatik digital dari satu edisi cetak (DOCX) yang sesetia mungkin dan seminimal mungkin intervensi.
+
+Canonical menyimpan:
+- Teks lengkap
+- Struktur redaksional (bab, fasal, fara')
+- Fenomena tipografi ilmiah (ayat Qur'an, syair, tabel ilmiah, figur ilmiah, footnote)
+- Pagination (nomor halaman dan jilid)
+
+Canonical tidak menyimpan:
+- Interpretasi ilmiah atau analisis
+- Klasifikasi isi kitab (muqaddimah, isi utama, dll)
+- Layout visual penerbit (font, ukuran, alignment)
+- File media biner (gambar, diagram disimpan terpisah)
+
+============================================================
+METADATA
+============================================================
+
+Metadata bersumber dari informasi intrinsik di DOCX. Sebagian fields bisa auto-extract, sebagian manual. Metadata ditulis dalam format YAML di awal file, dibatasi oleh garis triple-dash (---).
+
+STRUKTUR METADATA:
+
+---
+id: string                    (required)
+work_id: string               (optional)
+title: string                 (required)
+language: string              (required)
+
+author: string                (required)
+author_full: string           (optional)
+author_death_hijri: integer   (optional)
+
+edition: string               (required)
+edition_year: integer         (required)
+editor: string                (optional)
+publisher: string             (required)
+
+rights: string                (required)
+---
+
+PENJELASAN FIELDS:
+
+id
+  Format: {work_slug}_{publisher_slug}_{year}
+  Contoh: majmu_nawawi_darfikr_1997
+  Unique identifier dalam corpus
+
+work_id
+  Menghubungkan edisi berbeda dari karya yang sama
+  Contoh: majmu_nawawi (untuk semua edisi al-Majmu')
+
+title
+  Judul lengkap dalam bahasa asli
+  Contoh: المجموع شرح المهذب
+
+language
+  ISO 639-1 code (2 huruf)
+  ar (Arabic), en (English), id (Indonesian), dst
+
+author
+  Nama singkat penulis (sebagaimana dikenal)
+  Contoh: النووي
+
+author_full
+  Nama lengkap dengan nasab/nisba
+  Contoh: يحيى بن شرف النووي
+
+author_death_hijri
+  Tahun wafat dalam penanggalan Hijriah
+  Integer saja, tanpa "هـ"
+  Contoh: 676
+
+edition
+  Nama edisi atau penerbit (bahasa asli)
+  Contoh: دار الفكر
+
+edition_year
+  Tahun terbit dalam Masehi
+  Integer 4 digit
+  Contoh: 1997
+
+editor
+  Nama muhaqiq atau editor ilmiah
+  Contoh: محمد نجيب المطيعي
+
+publisher
+  Nama penerbit (transliterasi atau Inggris)
+  Contoh: Dar al-Fikr
+
+rights
+  Status hak cipta
+  Nilai yang diperbolehkan:
+    public_domain    (bebas digunakan)
+    copyrighted      (dilindungi hak cipta)
+    cc-by            (Creative Commons Attribution)
+    cc-by-sa         (CC Attribution-ShareAlike)
+    cc-by-nc         (CC Attribution-NonCommercial)
+    cc-by-nc-sa      (CC Attribution-NonCommercial-ShareAlike)
+
+============================================================
+CANONICAL TEXT SYNTAX
+============================================================
+
+HEADING
+------------------------------------------------------------
+
+#   Bab        (level 1)
+##  Sub-Bab       (level 2)
+### Sub-Subbab       (level 3)
+
+Sumber: Word Style "Heading 1", "Heading 2", "Heading 3"
+
+Aturan:
+- Setiap heading harus dipisah blank line sebelum dan sesudah
+- Tidak boleh lompat level (### langsung setelah #)
+- Heading Title dan Sub-title dapat digunakan sebagai alternatif (Title → H1, Sub-Title / SubTitle → H2).
+
+Contoh:
+
+# كتاب الطهارة
+
+## فصل الماء
+
+اعلم أن...
+
+### فرع في النية
+
+قال الشافعي...
+
+============================================================
+
+PARAGRAF
+------------------------------------------------------------
+
+Aturan:
+- Paragraf dipisahkan dengan satu baris kosong
+- Isi paragraf boleh multi-line (untuk readability)
+- Newline di dalam paragraf dianggap spasi biasa
+
+Contoh:
+
+اعلم أن العبد لا ينجو إلا برحمة الله،
+وأن الأصل في العبادات التوقيف،
+ولهذا قال العلماء: لا يشرع شيء إلا بدليل.
+
+فدل مجموع ذلك على أن العبادة مبناها على الاتباع 
+لا الابتداع.
+
+Parser membaca ini sebagai 2 paragraf terpisah.
+Newline dalam paragraf pertama diabaikan (jadi spasi).
+
+============================================================
+
+QUR'AN CONTENT
+------------------------------------------------------------
+A. QUR'AN REFERENCE {Q ...}
+------------------------------------------------------------
+
+{Q surah:ayah:word[:part]-surah:ayah:word[:part]}
+
+Sumber: QCF glyph fonts (decoded automatically)
+
+Fonts:
+- Fonts QCF4_Hafs_XX (XX = 01-47, font number not surah number)
+- QCF4_Hafs_XX_W (variant, official Madinah)
+- Total: 47 font files covering all 114 surahs
+- Source: King Fahd Glorious Quran Printing Complex
+- Markers dalam DOCX: F8E0 (begin), F8E1 (end)
+
+Komponen:
+- surah : Nomor surah (1-114)
+- ayah  : Nomor ayat
+- word  : Nomor kata dalam ayat (1-based)
+- part  : Bagian kata (optional, untuk morfem)
+
+Format Range:
+- Single word: {Q 2:21:4-2:21:4}
+- Same ayah:   {Q 2:21:1-2:21:4}
+- Cross ayah:  {Q 2:21:4-2:22:3}
+- With part:   {Q 112:2:1-112:2:2:1}
+
+Contoh:
+
+قال تعالى:
+{Q 2:21:1-2:21:4}
+
+ثم قال:
+{Q 2:21:18-2:21:23:2}
+
+والدليل {Q 112:1:1-112:2:4} على ذلك واضح.
+
+------------------------------------------------------------
+B. QUR'AN TEXT {Qt ...}
+------------------------------------------------------------
+
+{Qt [Unicode Qur'an text]}
+
+Sumber: Unicode Qur'an fonts (preserved as-is)
+
+Font:
+- KFGQPC_HAFS_Uthmanic_Script_H
+- Markers dalam DOCX: FD5F (begin), FD5E (end)
+
+Contoh:
+
+قال تعالى:
+{Qt يَا أَيُّهَا النَّاسُ اعْبُدُوا رَبَّكُمْ}
+
+ثم قال:
+{Qt الَّذِي خَلَقَكُمْ وَالَّذِينَ مِنْ قَبْلِكُمْ لَعَلَّكُمْ تَتَّقُونَ}
+
+والدليل {Qt قُلْ هُوَ اللَّهُ أَحَدٌ اللَّهُ الصَّمَدُ} واضح.
+
+============================================================
+
+SYAIR (BARIS PUITIK)
+------------------------------------------------------------
+
+> baris
+> bagian baris :: bagian baris
+> bagian baris :: bagian baris :: bagian baris
+
+Sumber: Table dengan style = "Poem"
+
+Aturan:
+- Setiap row table = satu baris canonical
+- Jika row memiliki 1 kolom teks non-empty → tidak ada :: (pemisah hemistich)
+- Jika row memiliki >1 kolom teks non-empty → join dengan :: 
+- Jika kolom berisi simbol separator (*, -, |) diabaikan
+
+Contoh:
+
+> بيت كامل في
+> العلم نور :: والجهل ظلام
+> صدر :: وسط :: عجز
+
+============================================================
+
+DATA TABLE (TABEL ILMIAH)
+------------------------------------------------------------
+
+::table [id=<identifier>] [style=<type>]
+| cell | cell | cell |
+| cell | cell | cell |
+::
+
+Sumber: Table dengan style = "DataTable"
+
+Aturan:
+- Untuk tabel konten ilmiah (falak, hisab, faraidh, nasab, dll)
+- Setiap baris diawali dan diakhiri karakter pipe |
+- id: Optional identifier untuk referensi
+- style: "data" (explicit) atau "unknown" (no style in DOCX)
+
+Contoh:
+
+::table style=data
+| اليوم | الارتفاع | الميل |
+| الأحد | 12 | 5 |
+| الاثنين | 13 | 6 |
+| الثلاثاء | 14 | 6.5 |
+::
+
+::table style=unknown
+| المؤلف | السنة |
+| النووي | 676 |
+| ابن حجر | 852 |
+::
+
+============================================================
+
+FIGURE (ILUSTRASI ILMIAH)
+------------------------------------------------------------
+
+::figure id=<identifier> src=<path>
+alt: <description>
+::
+
+Path format: figures/{canonical_id}_{figure_id}.{ext}
+
+Sumber:
+- Image di DOCX dengan style "Figure"
+- Atau image dengan alt text marker
+
+Komponen:
+- id:  Unique identifier (required, descriptive)
+- src: Relative path to extracted image (required)
+- alt: Caption/description (optional, on separate line)
+
+Aturan:
+- Untuk diagram, bagan, atau ilustrasi yang merupakan bagian isi kitab
+- File gambar actual disimpan terpisah di /media/figures/
+- Identifier bersifat descriptive, bukan sequential number
+
+Contoh:
+
+::figure id=astrolabe_01 src=figures/majmu_nawawi_darfikr_1997_astrolabe_01.png
+alt: شكل آلة الأسطرلاب
+::
+
+============================================================
+
+FOOTNOTE
+------------------------------------------------------------
+
+Dalam teks: text[^1]
+Definisi:   [^1]: teks footnote
+
+Sumber: Word native footnotes/endnotes
+
+Aturan:
+- Definisi harus langsung setelah paragraf pemanggil
+- Multiple footnotes ditulis berurutan
+- Nomor mengikuti edisi asli (tidak dinormalisasi)
+- Isi footnote tidak di-merge seperti paragraf biasa
+- Newline di dalam footnote dipertahankan
+
+Contoh:
+
+وقال الشافعي: من تعلم القرآن عظمت قيمته[^1][^2].
+
+[^1]: أي الرحمة الخاصة بالمؤمنين
+[^2]: شرح الثانية
+
+============================================================
+
+PAGINATION
+------------------------------------------------------------
+
+{V 2}  (volume/jilid marker, optional)
+{P 45} (page marker)
+
+Sumber: 
+- Page numbers dari header/footer DOCX
+
+Aturan:
+- {P} ditempatkan di posisi tepat page break, bisa inline di tengah kalimat
+- Parser tetap treat paragraph sebagai satu block
+- {V} opsional, harus muncul sebelum {P} pertama jilid baru
+- Nomor halaman mengikuti edisi cetak
+
+Contoh:
+
+{P 43}
+
+اعلم أن العبد لا ينجو إلا برحمة الله، وأن الأصل في 
+العبادات التوقيف، ولهذا {P 44} قال العلماء: لا يشرع 
+شيء إلا بدليل. فدل مجموع ذلك على أن العبادة مبناها 
+على الاتباع لا الابتداع.
+
+============================================================
+
+FRONTMATTER
+------------------------------------------------------------
+
+:::frontmatter
+...
+:::
+
+Sumber: Semua content sebelum Heading 1/2/3 pertama
+
+Aturan:
+- Untuk halaman judul, info cetakan, cover, dll
+- Frontmatter boundary = Heading pertama (level 1, 2, atau 3)
+- Semua style paragraph di frontmatter diperlakukan sebagai Normal
+
+Contoh:
+
+:::frontmatter
+المجموع شرح المهذب
+للإمام النووي
+دار الفكر - بيروت
+الطبعة الأولى ١٩٩٧ م
+:::
+
+============================================================
+CONTOH CANONICAL TEXT
+============================================================
+
+---
+id: majmu_nawawi_darfikr_1997
+work_id: majmu_nawawi
+title: المجموع شرح المهذب
+language: ar
+
+author: النووي
+author_full: يحيى بن شرف النووي
+author_death_hijri: 676
+
+edition: دار الفكر
+edition_year: 1997
+editor: محمد نجيب المطيعي
+publisher: Dar al-Fikr
+
+rights: public_domain
+---
+
+:::frontmatter
+المجموع شرح المهذب
+للإمام النووي
+دار الفكر - بيروت
+الطبعة الأولى ١٩٩٧ م
+:::
+
+{P 1}
+
+# كتاب الطهارة
+
+## فصل الماء
+
+اعلم أن العبد لا ينجو إلا برحمة الله،
+وأن الأصل في العبادات التوقيف،
+ولهذا قال العلماء: لا يشرع شيء إلا بدليل.
+
+قال تعالى:
+{Q 2:21:1-2:21:4}
+
+وقال أيضا:
+{Qt يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا قُمْتُمْ إِلَى الصَّلَاةِ}
+
+ثم قال:
+{Q 2:21:18-2:21:23:2}
+
+فدل مجموع ذلك على أن العبادة مبناها على الاتباع 
+لا الابتداع.
+
+{P 45}
+
+وكان من أذكارهم قولهم:
+{Q 112:1:1-112:2:4}
+
+ومن تدبرها علم معنى التوحيد.
+
+> العلم نور :: والجهل ظلام
+> والقلب بيت :: والذكر سكان
+
+وقال النبي ﷺ:
+إنما الأعمال بالنيات وإنما لكل امرئ ما نوى.
+
+وقال الشافعي:
+من تعلم القرآن عظمت قيمته[^1][^2].
+
+[^1]: أي الرحمة الخاصة بالمؤمنين
+[^2]: شرح الثانية
+
+وقال بعض العلماء:
+العلم أفضل من المال.
+
+### فرع في الهيئة
+
+قال أصحاب الهيئة: شكل آلة الأسطرلاب:
+
+::figure id=astrolabe_01 src=figures/majmu_nawawi_darfikr_1997_astrolabe_01.png
+alt: شكل آلة الأسطرلاب
+::
+
+{P 46}
+
+قال أصحاب الهيئة: هذا جدول ارتفاع الشمس في بعض 
+الأيام:
+
+::table
+| اليوم | الارتفاع | الميل |
+| الأحد | 12 | 5 |
+| الاثنين | 13 | 6 |
+| الثلاثاء | 14 | 6.5 |
+::
+
+ويستفاد منه معرفة وقت الزوال بدقة.
+
+============================================================
+VERSION HISTORY
+============================================================
+
+v1.1.1 (2026-02-17):
+- CRITICAL FIX: QCF fonts corrected to 47 fonts (not 114)
+  * XX = 01-47 (font number, not surah number)
+  * Added clarification: 47 fonts cover all 114 surahs
+  * Source: King Fahd Glorious Quran Printing Complex
+- FRONTMATTER: Updated boundary to "Heading 1/2/3" (not just "Heading 1")
+  * Aligned with Parser Specification v1.0
+  * Added note about style treatment (all → Normal)
+- TABLE: Added table without style handling
+  * ::table style=unknown for tables without Poem/DataTable style
+  * User can convert in web editor
+  * Generic tables are valid output
+- Synchronized with Parser Specification v1.0
+
+v1.1 (2024-02-16):
+- SYAIR: Clarified flexible multi-column with :: separator
+- FIGURE: Added src attribute and optional alt text
+- FRONTMATTER: Clarified behavior when no Heading 1 exists
+- PAGINATION: Specified inline placement at exact break
+- QUR'AN: Added dual-format system:
+  * {Q ...} for references (QCF glyph decoded)
+  * {Qt ...} for Unicode text (KFGQPC preserved)
+  * Cross-ayah range examples
+- Minor clarifications throughout
+
+v1.0 (2024-02-15):
+- Initial release
+- Core syntax: heading, paragraph, Qur'an, poetry, table, figure, footnote, pagination
+- Minimal metadata (11 fields)
+- Diplomatic transcription philosophy
+- Git-friendly format
+
+============================================================
+LICENSE
+============================================================
+
+Canonical Text Standard v1.1.1
+Copyright (c) 2024-2026
+
+This standard is released under CC-BY-SA-4.0.
+You are free to use, modify, and distribute this standard with attribution.
+
+============================================================
+CONTACT & CONTRIBUTION
+============================================================
+
+For questions, suggestions, or contributions:
+- GitHub: https://github.com/baalwi-id/maktabah/
+- Email: info@baalwi.net
+
+============================================================
+END OF STANDARD
+============================================================

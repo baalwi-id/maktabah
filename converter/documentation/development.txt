@@ -1,0 +1,6 @@
+Version:
+2026/02/19 10.30 - stabil dan konsisten, tetapi masih ada fallback untuk pagination non-VBA page markers
+
+Pengembangan:
+- Menghilangkan fallback halaman, hanya VBA page marker.
+- Membubat kode json compact dan melihat signifikansi perubahan size.
